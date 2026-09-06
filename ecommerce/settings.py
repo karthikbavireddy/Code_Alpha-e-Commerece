@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'ecommerce.middleware.ExceptionLoggingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -120,13 +121,16 @@ if is_running_tests:
         }
     }
 elif database_url:
+    # Use conn_max_age=0 for serverless (Vercel) to prevent stale pooled TCP connection drops
     db_config = dj_database_url.config(
         default=database_url,
-        conn_max_age=600,
+        conn_max_age=0,
     )
-    # Ensure SSL mode require for Neon PostgreSQL connections
+    options = db_config.setdefault('OPTIONS', {})
     if 'neon.tech' in database_url or 'sslmode=require' in database_url:
-        db_config.setdefault('OPTIONS', {})['sslmode'] = 'require'
+        options['sslmode'] = 'require'
+    # PgBouncer does not support channel_binding - strip if present to prevent rejection
+    options.pop('channel_binding', None)
     DATABASES = {
         'default': db_config
     }
@@ -197,8 +201,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Media files (uploaded product photos)
 MEDIA_URL = '/media/'
