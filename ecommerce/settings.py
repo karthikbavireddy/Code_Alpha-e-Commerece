@@ -31,10 +31,18 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '*')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()] or ['*']
+if '*' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.extend(['.vercel.app', 'localhost', '127.0.0.1'])
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'https://*.now.sh',
+]
 csrf_trusted_env = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 if csrf_trusted_env:
-    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted_env.split(',') if origin.strip()]
+    for origin in csrf_trusted_env.split(','):
+        if origin.strip() and origin.strip() not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin.strip())
 
 
 # Application definition
@@ -90,6 +98,10 @@ is_running_tests = 'test' in sys.argv or any('test' in arg for arg in sys.argv)
 
 database_url = os.environ.get('DATABASE_URL')
 db_engine = os.environ.get('DB_ENGINE', '').lower()
+
+# Default fallback to production Neon PostgreSQL if not configured
+if not database_url and not db_engine:
+    database_url = 'postgresql://neondb_owner:npg_ekvQ5OGwsX7P@ep-frosty-shadow-b3lthv37-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 
 # Automatically install PyMySQL as MySQLdb for seamless MySQL support on Windows
 if db_engine == 'mysql' or (database_url and database_url.startswith('mysql')):
@@ -186,6 +198,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
 
 # Media files (uploaded product photos)
 MEDIA_URL = '/media/'
