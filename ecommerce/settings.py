@@ -24,7 +24,8 @@ import dj_database_url
 load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-%lyhp1sipymirjy_d@_(+axf@vghji$%nq1!p*iq79l@250*y1')
+raw_secret = os.environ.get('SECRET_KEY', '')
+SECRET_KEY = raw_secret.strip() or 'django-insecure-%lyhp1sipymirjy_d@_(+axf@vghji$%nq1!p*iq79l@250*y1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
@@ -97,8 +98,8 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 import sys
 is_running_tests = 'test' in sys.argv or any('test' in arg for arg in sys.argv)
 
-database_url = os.environ.get('DATABASE_URL')
-db_engine = os.environ.get('DB_ENGINE', '').lower()
+database_url = (os.environ.get('DATABASE_URL') or '').strip()
+db_engine = (os.environ.get('DB_ENGINE') or '').strip().lower()
 
 # Default fallback to production Neon PostgreSQL if not configured
 if not database_url and not db_engine:
@@ -121,9 +122,9 @@ if is_running_tests:
         }
     }
 elif database_url:
-    # Use conn_max_age=0 for serverless (Vercel) to prevent stale pooled TCP connection drops
-    db_config = dj_database_url.config(
-        default=database_url,
+    # Use dj_database_url.parse to ensure non-empty dictionary regardless of env var quirks
+    db_config = dj_database_url.parse(
+        database_url,
         conn_max_age=0,
     )
     options = db_config.setdefault('OPTIONS', {})
