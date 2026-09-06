@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CodeAlpha E-Commerce Store{% endblock %}</title>
+  <meta name="description" content="Discover premium electronics, apparel, and lifestyle accessories on CodeAlpha Store.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <!-- Logo -->
+        <a href="{% url 'store:product_list' %}" class="brand-logo" id="brand-logo-link">
+          <span class="brand-badge">ALPHA</span>
+          <span>Store</span>
+        </a>
+
+        <!-- Search Bar -->
+        <form action="{% url 'store:product_list' %}" method="GET" class="search-form" id="search-form">
+          <svg class="search-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" name="q" class="search-input" id="search-input" placeholder="Search curated products..." value="{{ request.GET.q|default:'' }}">
+        </form>
+
+        <!-- Nav actions -->
+        <div class="nav-actions">
+          <a href="{% url 'store:product_list' %}" class="nav-link" id="nav-catalog-link">Catalog</a>
+
+          <!-- Cart Button -->
+          <a href="{% url 'store:cart_detail' %}" class="cart-button" id="nav-cart-btn">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span>Cart</span>
+            <span class="cart-badge" id="cart-item-count">{{ cart|length }}</span>
+          </a>
+
+          <!-- User Authentication Section -->
+          {% if request.user.is_authenticated %}
+            <div class="user-menu">
+              {% if request.user.is_staff %}
+                <a href="/admin/" class="btn btn-warning btn-sm" style="background: #f59e0b; color: #1e1b4b; font-weight: 700; border-radius: 6px; padding: 0.35rem 0.75rem; text-decoration: none;" id="nav-admin-portal-btn" target="_blank" title="Open Staff Admin Portal">
+                  &#9881; Admin Portal
+                </a>
+              {% endif %}
+              <a href="{% url 'store:order_history' %}" class="nav-link" id="nav-orders-link" title="My Orders">
+                My Orders
+              </a>
+              <a href="{% url 'store:returns_list' %}" class="nav-link" id="nav-returns-link" title="My Returns & Refunds">
+                Returns
+              </a>
+              <span class="user-tag">Hi, <strong>{{ request.user.username }}</strong>{% if request.user.is_staff %} <small style="color: var(--primary); font-weight: 700;">(Staff)</small>{% endif %}</span>
+              <a href="{% url 'store:logout' %}" class="btn btn-secondary btn-sm" id="nav-logout-btn">Logout</a>
+            </div>
+          {% else %}
+            <div class="user-menu">
+              <a href="{% url 'store:login' %}" class="nav-link" id="nav-login-link">Sign In</a>
+              <a href="{% url 'store:register' %}" class="btn btn-primary btn-sm" id="nav-register-btn">Register</a>
+            </div>
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  {% if messages %}
+    <div class="toast-container" id="messages-container">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">
+          <span>{{ message }}</span>
+          <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main Content Body -->
+  <main class="main-content">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 <strong>CodeAlpha_ECommerceStore</strong>. Powered by Neon PostgreSQL & Django.</p>
+    </div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,74 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Sign In - CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="auth-wrapper">
+    <div class="form-card">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="brand-badge" style="font-size: 1.1rem; display: inline-block; margin-bottom: 0.75rem;">CUSTOMER PORTAL</span>
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--dark);">Shopper Sign In</h1>
+        <p style="color: var(--slate-500); font-size: 0.9rem;">Sign in to your customer account to place orders and track returns</p>
+      </div>
+
+      <form action="{% url 'store:login' %}" method="POST" id="login-form">
+        {% csrf_token %}
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label for="id_username" class="form-label">Username</label>
+          <input type="text" name="username" id="id_username" class="form-control" required autofocus placeholder="Enter your customer username">
+          {% if form.username.errors %}
+            <span style="color: var(--danger); font-size: 0.8rem;">{{ form.username.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_password" class="form-label">Password</label>
+          <input type="password" name="password" id="id_password" class="form-control" required placeholder="Enter your password">
+          {% if form.password.errors %}
+            <span style="color: var(--danger); font-size: 0.8rem;">{{ form.password.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div style="margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem;" id="login-submit-btn">
+            Sign In as Customer
+          </button>
+        </div>
+      </form>
+
+      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--slate-200); text-align: center; font-size: 0.9rem; color: var(--slate-600);">
+        Don't have a customer account? 
+        <a href="{% url 'store:register' %}{% if next %}?next={{ next }}{% endif %}" style="color: var(--primary); font-weight: 700;">
+          Create an Account
+        </a>
+      </div>
+
+      <!-- Separate Admin Login Notice -->
+      <div style="margin-top: 1.25rem; padding: 0.9rem 1rem; background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 8px; text-align: center; font-size: 0.85rem; color: var(--slate-600);">
+        <span>Looking for Staff Administration?</span>
+        <div style="margin-top: 0.35rem;">
+          <a href="/admin/" style="color: #b45309; font-weight: 700; text-decoration: none;" id="admin-panel-login-link">
+            &#128274; Go to Admin Portal Login &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

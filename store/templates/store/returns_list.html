@@ -1,0 +1,95 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Returns &amp; Refunds - CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div style="margin: 2.5rem 0 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--dark);">Returns &amp; Refunds</h1>
+      <p style="color: var(--slate-500);">Track your submitted returns, approval status, and refund progress.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="{% url 'store:order_history' %}" class="btn btn-secondary btn-sm" style="font-weight: 700;">Orders</a>
+      <a href="{% url 'store:returns_list' %}" class="btn btn-primary btn-sm" style="font-weight: 700;">Returns &amp; Refunds</a>
+    </div>
+  </div>
+
+  {% if returns %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;" id="returns-list">
+      {% for ret in returns %}
+        <div class="history-card" id="return-card-{{ ret.id }}" style="border-left: 4px solid var(--primary);">
+          <div class="history-header">
+            <div>
+              <span style="font-size: 0.85rem; color: var(--slate-500);">Requested on: {{ ret.created_at|date:"M d, Y &bull; H:i" }}</span>
+              <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--dark); margin-top: 0.2rem;">
+                Return {{ ret.return_id }}
+              </h2>
+              <div style="font-size: 0.85rem; color: var(--slate-600); margin-top: 0.2rem;">
+                Associated Order: <strong>{{ ret.order.order_id|default:ret.order.id }}</strong>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <span class="badge-status badge-{{ ret.status }}" style="font-size: 0.85rem;">
+                {{ ret.get_status_display }}
+              </span>
+              <span style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">
+                ${{ ret.refund_amount|floatformat:2 }} Est. Refund
+              </span>
+            </div>
+          </div>
+
+          <div style="margin: 1rem 0; font-size: 0.92rem;">
+            <div style="margin-bottom: 0.5rem;">
+              <span style="color: var(--slate-500); font-weight: 600;">Reason:</span>
+              <span style="font-weight: 700; color: var(--slate-800);">{{ ret.get_reason_display }}</span>
+            </div>
+
+            {% if ret.item %}
+              <div style="margin-bottom: 0.5rem;">
+                <span style="color: var(--slate-500); font-weight: 600;">Returning Item:</span>
+                <span style="font-weight: 700; color: var(--slate-800);">{{ ret.item.product_name }} (Qty: {{ ret.item.quantity }})</span>
+              </div>
+            {% else %}
+              <div style="margin-bottom: 0.5rem;">
+                <span style="color: var(--slate-500); font-weight: 600;">Scope:</span>
+                <span style="font-weight: 700; color: var(--slate-800);">Entire Order (All Items)</span>
+              </div>
+            {% endif %}
+
+            <div style="background: var(--slate-50); border-radius: 6px; padding: 0.75rem 1rem; border: 1px solid var(--slate-200); margin-top: 0.75rem;">
+              <span style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--slate-500); font-weight: 700; margin-bottom: 0.25rem;">Customer Note</span>
+              <p style="color: var(--slate-700); margin: 0; font-size: 0.9rem;">{{ ret.description }}</p>
+            </div>
+
+            {% if ret.admin_notes %}
+              <div style="background: #eff6ff; border-radius: 6px; padding: 0.75rem 1rem; border: 1px solid #bfdbfe; margin-top: 0.75rem;">
+                <span style="display: block; font-size: 0.8rem; text-transform: uppercase; color: #1e40af; font-weight: 700; margin-bottom: 0.25rem;">Staff Update</span>
+                <p style="color: #1e3a8a; margin: 0; font-size: 0.9rem;">{{ ret.admin_notes }}</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <div style="font-size: 0.82rem; color: var(--slate-500); padding-top: 0.75rem; border-top: 1px solid var(--slate-100); display: flex; justify-content: space-between; align-items: center;">
+            <span>Last updated: {{ ret.updated_at|date:"M d, Y &bull; H:i" }}</span>
+            <a href="{% url 'store:order_confirmation' order_id=ret.order.id %}" style="color: var(--primary); font-weight: 600;">
+              View Original Receipt &rarr;
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#8634;</div>
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--dark);">No Return Requests</h2>
+      <p style="color: var(--slate-500); margin: 0.5rem 0 1.75rem;">You haven't requested any returns. You can request a return directly from your completed orders.</p>
+      <a href="{% url 'store:order_history' %}" class="btn btn-primary">Go to Order History</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

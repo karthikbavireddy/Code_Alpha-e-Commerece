@@ -1,0 +1,88 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmation {{ order.order_id|default:order.id }} - CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="confirmation-card">
+    <div class="success-icon-circle">
+      <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+
+    <span style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.08em; font-weight: 700; color: var(--success);">
+      Payment &amp; Order Confirmed
+    </span>
+
+    <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--dark); margin: 0.4rem 0 0.8rem;" id="confirmation-order-id">
+      {{ order.order_id|default:order.id }}
+    </h1>
+
+    {% if order.tracking_number %}
+      <div style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1.25rem;">
+        &#128230; Tracking Number: <code>{{ order.tracking_number }}</code>
+      </div>
+    {% endif %}
+
+    <p style="color: var(--slate-500); max-width: 500px; margin: 0 auto 1.5rem;">
+      Thank you for shopping with us, <strong>{{ order.full_name }}</strong>! We have received your order and are currently preparing it for dispatch.
+    </p>
+
+    <!-- Shipping Address Summary -->
+    <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin: 1.5rem 0;" id="confirmation-shipping-info">
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--slate-700); margin-bottom: 0.5rem;">Shipping Address</h3>
+      <p style="color: var(--slate-800); font-weight: 600;">{{ order.full_name }}</p>
+      <p style="color: var(--slate-600); font-size: 0.9rem;">{{ order.address }}</p>
+      <p style="color: var(--slate-600); font-size: 0.9rem;">{{ order.city }}, {{ order.postal_code }}</p>
+      <div style="margin-top: 0.5rem;">
+        <span class="badge-status badge-{{ order.status }}">Status: {{ order.get_status_display }}</span>
+      </div>
+    </div>
+
+    <!-- Itemized Breakdown -->
+    <div class="order-items-receipt">
+      <div class="receipt-header">Items Ordered</div>
+      {% for item in order.items.all %}
+        <div class="receipt-item">
+          <div>
+            <span style="font-weight: 700; color: var(--dark);">{{ item.product_name }}</span>
+            <span style="color: var(--slate-500); font-size: 0.85rem;"> &times; {{ item.quantity }}</span>
+          </div>
+          <span style="font-weight: 700; color: var(--slate-800);">${{ item.subtotal|floatformat:2 }}</span>
+        </div>
+      {% endfor %}
+      
+      {% if order.shipping_fee > 0 %}
+        <div class="receipt-item">
+          <span style="color: var(--slate-600);">Shipping</span>
+          <span style="font-weight: 600;">${{ order.shipping_fee|floatformat:2 }}</span>
+        </div>
+      {% endif %}
+      {% if order.tax_amount > 0 %}
+        <div class="receipt-item">
+          <span style="color: var(--slate-600);">Tax</span>
+          <span style="font-weight: 600;">${{ order.tax_amount|floatformat:2 }}</span>
+        </div>
+      {% endif %}
+      <div class="receipt-item" style="background: var(--slate-50); border-top: 2px solid var(--slate-200); font-size: 1.1rem;">
+        <strong style="color: var(--dark);">Total Amount</strong>
+        <strong style="color: var(--primary);" id="confirmation-total">${{ order.grand_total|floatformat:2 }}</strong>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+      <a href="{% url 'store:order_history' %}" class="btn btn-secondary" id="view-orders-btn">
+        View Order History
+      </a>
+      <a href="{% url 'store:product_list' %}" class="btn btn-primary" id="continue-shopping-btn">
+        Continue Shopping &rarr;
+      </a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

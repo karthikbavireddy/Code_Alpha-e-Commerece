@@ -1,0 +1,135 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Your Shopping Cart - CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container">
+  
+  <div style="margin: 2rem 0 1rem;">
+    <h1 style="font-size: 2rem; font-weight: 800; color: var(--dark);">Shopping Cart</h1>
+    <p style="color: var(--slate-500);">Review and manage your selected items.</p>
+  </div>
+
+  {% if cart|length > 0 %}
+    <div class="cart-layout">
+      <!-- Items Table -->
+      <div class="cart-items-card">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart %}
+              <tr id="cart-row-{{ item.product.id }}">
+                <td>
+                  <div class="cart-product-cell">
+                    {% if item.product.image %}
+                      <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-thumb">
+                    {% else %}
+                      <div class="cart-thumb" style="display:flex; align-items:center; justify-content:center;">
+                        &#128230;
+                      </div>
+                    {% endif %}
+                    <div>
+                      <a href="{% url 'store:product_detail' slug=item.product.slug %}" class="cart-prod-title">
+                        {{ item.product.name }}
+                      </a>
+                      <div style="font-size: 0.8rem; color: var(--slate-500);">
+                        Max in stock: {{ item.product.stock }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Price -->
+                <td style="font-weight: 600; color: var(--slate-700);">
+                  ${{ item.price }}
+                </td>
+
+                <!-- Quantity Update Form -->
+                <td>
+                  <form action="{% url 'store:cart_update' product_id=item.product.id %}" method="POST" style="display: flex; align-items: center; gap: 0.4rem;">
+                    {% csrf_token %}
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}"
+                           class="quantity-input" style="width: 58px; height: 36px; border: 1px solid var(--slate-300); border-radius: var(--radius-sm);"
+                           id="qty-input-{{ item.product.id }}">
+                    <button type="submit" class="btn btn-secondary btn-sm" title="Update Quantity" id="update-btn-{{ item.product.id }}">
+                      Update
+                    </button>
+                  </form>
+                </td>
+
+                <!-- Subtotal -->
+                <td style="font-weight: 800; color: var(--dark);" id="subtotal-{{ item.product.id }}">
+                  ${{ item.subtotal|floatformat:2 }}
+                </td>
+
+                <!-- Remove Form -->
+                <td style="text-align: right;">
+                  <form action="{% url 'store:cart_remove' product_id=item.product.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" id="remove-btn-{{ item.product.id }}" title="Remove item">
+                      &times; Remove
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+          <a href="{% url 'store:product_list' %}" class="btn btn-secondary">
+            &larr; Continue Shopping
+          </a>
+        </div>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="cart-order-summary">
+        <h2 class="summary-title">Order Summary</h2>
+
+        <div class="summary-row">
+          <span>Items ({{ cart|length }}):</span>
+          <span>${{ cart.get_total_price|floatformat:2 }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Standard Shipping:</span>
+          <span style="color: var(--success); font-weight: 700;">FREE</span>
+        </div>
+
+        <div class="summary-row total">
+          <span>Estimated Total:</span>
+          <span id="cart-total-price">${{ cart.get_total_price|floatformat:2 }}</span>
+        </div>
+
+        <div style="margin-top: 1.75rem;">
+          <a href="{% url 'store:checkout' %}" class="btn btn-primary btn-block" style="padding: 0.85rem;" id="proceed-checkout-btn">
+            Proceed to Checkout &rarr;
+          </a>
+          <p style="font-size: 0.8rem; color: var(--slate-500); text-align: center; margin-top: 0.85rem;">
+            Secure Checkout with SSL Encryption.
+          </p>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <!-- Empty Cart State -->
+    <div class="empty-state">
+      <div class="empty-icon">&#128722;</div>
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--dark);">Your Cart is Currently Empty</h2>
+      <p style="color: var(--slate-500); margin: 0.5rem 0 1.75rem;">Explore our catalog and find items you love!</p>
+      <a href="{% url 'store:product_list' %}" class="btn btn-primary" id="start-shopping-btn">Start Shopping Now</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

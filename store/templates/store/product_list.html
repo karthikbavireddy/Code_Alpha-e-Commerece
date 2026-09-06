@@ -1,0 +1,136 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Shop Modern Essentials - CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Hero Section -->
+  <section class="hero-banner">
+    <div class="hero-glow-aura"></div>
+    <div class="hero-content">
+      <div class="hero-badge-pill">
+        <span class="pulse-dot"></span>
+        <span>Curated Luxury Collection 2026</span>
+      </div>
+      <h1 class="hero-title">Precision Tech &amp; Elevated Living</h1>
+      <p class="hero-desc">Discover our handpicked catalog of audio engineering, wearable intelligence, and workspace essentials crafted for seamless performance.</p>
+      
+      <div class="hero-trust-bar">
+        <div class="trust-item">
+          <svg class="trust-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/>
+          </svg>
+          <span>Neon Cloud Secured</span>
+        </div>
+        <div class="trust-item">
+          <svg class="trust-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+          </svg>
+          <span>Express 24h Dispatch</span>
+        </div>
+        <div class="trust-item">
+          <svg class="trust-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+          </svg>
+          <span>30-Day Hassle-Free Returns</span>
+        </div>
+        <div class="trust-item">
+          <span style="color: #fbbf24;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          <span>4.98 / 5 Rating</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Filter Bar -->
+  <div class="category-filter-bar">
+    <a href="{% url 'store:product_list' %}" class="category-pill {% if not selected_category %}active{% endif %}" id="cat-pill-all">
+      All Products
+    </a>
+    {% for category in categories %}
+      <a href="{% url 'store:product_list' %}?category={{ category.slug }}" 
+         class="category-pill {% if selected_category.slug == category.slug %}active{% endif %}"
+         id="cat-pill-{{ category.slug }}">
+        {{ category.name }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if search_query %}
+    <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); padding: 0.75rem 1.25rem; border-radius: 10px;">
+      <span style="color: var(--slate-300); font-size: 0.92rem;">
+        Search results for "<strong>{{ search_query }}</strong>" &bull; {{ products.count }} product{{ products.count|pluralize }} found
+      </span>
+      <a href="{% url 'store:product_list' %}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+        Clear Filter &times;
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- Product Grid -->
+  {% if products %}
+    <div class="product-grid" id="product-grid">
+      {% for product in products %}
+        <article class="product-card" id="product-card-{{ product.id }}">
+          <a href="{% url 'store:product_detail' slug=product.slug %}" class="product-image-wrap">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img" loading="lazy">
+            {% else %}
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            {% endif %}
+
+            <!-- In-stock / Out-of-stock Indicator -->
+            {% if product.is_in_stock %}
+              <span class="stock-badge in-stock">
+                <span class="stock-radar-dot"></span>
+                In Stock ({{ product.stock }})
+              </span>
+            {% else %}
+              <span class="stock-badge out-of-stock">
+                <span class="stock-radar-dot out"></span>
+                Out of Stock
+              </span>
+            {% endif %}
+          </a>
+
+          <div class="product-info">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              {% if product.category %}
+                <span class="product-category-tag">{{ product.category.name }}</span>
+              {% endif %}
+              <span class="product-rating">&#9733; 4.9</span>
+            </div>
+
+            <h2 class="product-title">
+              <a href="{% url 'store:product_detail' slug=product.slug %}">{{ product.name }}</a>
+            </h2>
+            <p class="product-desc-snippet">{{ product.description|default:"Precision crafted for premium experience." }}</p>
+
+            <div class="product-card-footer">
+              <div class="price-container">
+                <span class="price-currency">$</span>
+                <span class="product-price">{{ product.price }}</span>
+              </div>
+              <a href="{% url 'store:product_detail' slug=product.slug %}" class="btn btn-primary btn-sm" id="view-btn-{{ product.slug }}">
+                View Details &rarr;
+              </a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#128722;</div>
+      <h3>No Products Found</h3>
+      <p style="color: var(--slate-500); margin-top: 0.5rem;">There are no products matching your selected criteria.</p>
+      <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top: 1.5rem;">Reset Filters</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
