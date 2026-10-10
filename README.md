@@ -1,3 +1,4 @@
+Deployed URL https://codealpha-e-commerce.vercel.app/
 # CodeAlpha_ECommerceStore
 
 A full-stack, responsive e-commerce web application built with Python, Django, Neon PostgreSQL, and modern responsive CSS.
